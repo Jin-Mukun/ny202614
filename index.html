@@ -148,13 +148,30 @@
     </footer>
 
     <script>
-        // 简单的视频播放函数
+        // 优化视频加载逻辑，添加预加载和懒加载功能
+        document.addEventListener('DOMContentLoaded', () => {
+            const videoItems = document.querySelectorAll('.video-item');
+
+            videoItems.forEach(item => {
+                const videoSrc = item.getAttribute('onclick').match(/'(.*?)'/)[1];
+                const preloadLink = document.createElement('link');
+                preloadLink.rel = 'preload';
+                preloadLink.as = 'video';
+                preloadLink.href = videoSrc;
+                document.head.appendChild(preloadLink);
+            });
+        });
+
+        // 懒加载视频播放
         function playVideo(videoSrc, videoTitle) {
             const videoPlayer = document.getElementById('main-video');
             const videoTitleElement = document.getElementById('current-video-title');
-            
-            // 更改视频源
-            videoPlayer.src = videoSrc;
+
+            if (videoPlayer.src !== videoSrc) {
+                // 更改视频源
+                videoPlayer.src = videoSrc;
+            }
+
             // 更新视频标题
             videoTitleElement.textContent = videoTitle;
             // 播放视频
