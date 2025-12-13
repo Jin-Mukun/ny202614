@@ -148,40 +148,82 @@
     </footer>
 
     <script>
-        // 优化视频加载逻辑，添加预加载功能（已去除缩略图懒加载）
+        // 优化视频加载逻辑 - 使用XMLHttpRequest预加载
         document.addEventListener('DOMContentLoaded', () => {
             const videoItems = document.querySelectorAll('.video-item');
-
+            const preloadedVideos = new Map(); // 存储已预加载的视频
+            
+            // 预加载第一个视频
+            preloadVideo('videos/video1.mp4');
+            
+            // 监听鼠标悬停预加载
             videoItems.forEach(item => {
-                const videoSrc = item.getAttribute('onclick').match(/'(.*?)'/)[1];
-                const preloadLink = document.createElement('link');
-                preloadLink.rel = 'preload';
-                preloadLink.as = 'video';
-                preloadLink.href = videoSrc;
-                document.head.appendChild(preloadLink);
+                item.addEventListener('mouseenter', function() {
+                    const videoSrc = this.getAttribute('onclick').match(/'(.*?)'/)[1];
+                    if (!preloadedVideos.has(videoSrc)) {
+                        preloadVideo(videoSrc);
+                    }
+                });
             });
-        });
-
-        // 懒加载视频播放
-        function playVideo(videoSrc, videoTitle) {
-            const videoPlayer = document.getElementById('main-video');
-            const videoTitleElement = document.getElementById('current-video-title');
-
-            if (videoPlayer.src !== videoSrc) {
-                // 更改视频源
-                videoPlayer.src = videoSrc;
+            
+            function preloadVideo(url) {
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', url, true);
+                xhr.responseType = 'blob';
+                
+                xhr.onload = function() {
+                    if (this.status === 200) {
+                        const blob = this.response;
+                        const videoURL = URL.createObjectURL(blob);
+                        preloadedVideos.set(url, videoURL);
+                        console.log('预加载成功:', url);
+                    }
+                };
+                
+                xhr.onerror = function() {
+                    console.warn('预加载失败:', url);
+                };
+                
+                xhr.send();
             }
-
-            // 更新视频标题
-            videoTitleElement.textContent = videoTitle;
-            // 播放视频
-            videoPlayer.play();
-        }
+            
+            // 重写playVideo函数以使用预加载的视频
+            window.playVideo = function(videoSrc, videoTitle) {
+                const videoPlayer = document.getElementById('main-video');
+                const videoTitleElement = document.getElementById('current-video-title');
+                
+                // 如果有预加载的Blob URL，优先使用
+                if (preloadedVideos.has(videoSrc)) {
+                    videoPlayer.src = preloadedVideos.get(videoSrc);
+                } else {
+                    videoPlayer.src = videoSrc;
+                    // 同时后台预加载
+                    preloadVideo(videoSrc);
+                }
+                
+                // 更新视频标题
+                videoTitleElement.textContent = videoTitle;
+                // 播放视频
+                const playPromise = videoPlayer.play();
+                
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => {
+                        console.log('自动播放被阻止，用户需要手动点击播放');
+                    });
+                }
+            };
+        });
         
         // 添加错误处理
         document.getElementById('main-video').addEventListener('error', function(e) {
             console.error('视频加载错误:', e);
-            alert('视频加载失败，请检查文件路径和格式。建议将.3gp文件转换为.mp4格式以获得更好的兼容性。');
+            alert('视频加载失败，请检查文件路径和格式。');
+        });
+        
+        // 清理Blob URL防止内存泄漏
+        window.addEventListener('beforeunload', () => {
+            // 这里可以添加清理预加载的Blob URL的代码
+            // 但由于在Map中存储，页面关闭时会自动清理
         });
     </script>
 </body>
