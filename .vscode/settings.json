@@ -1,0 +1,47 @@
+{
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/.git/**": true
+  },
+  "files.exclude": {
+    "**/.git": true,
+    "**/.github": true,
+    "**/node_modules": true
+  },
+
+  "git.enabled": false,
+  "git.autofetch": false,
+
+  "extensions.autoUpdate": false,
+  "extensions.autoCheckUpdates": false,
+
+  "telemetry.enableTelemetry": false,
+  "telemetry.enableCrashReporter": false,
+
+  "editor.minimap.enabled": false,
+  "editor.codeLens": false,
+  "editor.formatOnSave": false,
+  "editor.formatOnType": false,
+  "editor.semanticHighlighting.enabled": false,
+
+  "javascript.suggest.enabled": false,
+  "typescript.suggest.enabled": false,
+  "javascript.validate.enable": false,
+  "typescript.validate.enable": false,
+
+  "css.validate": false,
+  "less.validate": false,
+  "scss.validate": false,
+
+  "html.validate.scripts": false,
+  "html.validate.styles": false,
+
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 1000,
+
+  "search.followSymlinks": false,
+  "search.useIgnoreFiles": true,
+
+  "workbench.enableExperiments": false,
+  "workbench.startupEditor": "none"
+}
