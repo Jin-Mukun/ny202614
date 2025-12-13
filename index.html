@@ -122,19 +122,19 @@
             <h2>视频列表</h2>
             <div class="video-list">
                 <!-- 视频1 -->
-                <div class="video-item" onclick="playVideo('videos/video1.mp4', 'video1')">
+                <div class="video-item" onclick="loadAndPlayVideo('videos/video1.mp4', 'video1')">
                     <h3 class="video-item-title">video1</h3>
                     <p>这是原始鼻祖，也是目前的巅峰之作，演员：水哥，简</p>
                 </div>
                 
                 <!-- 视频2 -->
-                <div class="video-item" onclick="playVideo('videos/video2.mp4', 'video2')">
+                <div class="video-item" onclick="loadAndPlayVideo('videos/video2.mp4', 'video2')">
                     <h3 class="video-item-title">video2</h3>
                     <p>扫地机器人测评</p>
                 </div>
                 
                 <!-- 视频3 -->
-                <div class="video-item" onclick="playVideo('videos/video3.mp4', 'video3')">
+                <div class="video-item" onclick="loadAndPlayVideo('videos/video3.mp4', 'video3')">
                     <h3 class="video-item-title">video3</h3>
                     <p>战神反击战</p>
                 </div>
@@ -148,82 +148,36 @@
     </footer>
 
     <script>
-        // 优化视频加载逻辑 - 使用XMLHttpRequest预加载
-        document.addEventListener('DOMContentLoaded', () => {
-            const videoItems = document.querySelectorAll('.video-item');
-            const preloadedVideos = new Map(); // 存储已预加载的视频
+        // 主播放函数 (修复版)
+        function loadAndPlayVideo(videoSrc, videoTitle) {
+            const videoPlayer = document.getElementById('main-video');
+            const videoTitleElement = document.getElementById('current-video-title');
             
-            // 预加载第一个视频
-            preloadVideo('videos/video1.mp4');
+            // 立即更新标题，避免闪烁
+            videoTitleElement.textContent = videoTitle;
             
-            // 监听鼠标悬停预加载
-            videoItems.forEach(item => {
-                item.addEventListener('mouseenter', function() {
-                    const videoSrc = this.getAttribute('onclick').match(/'(.*?)'/)[1];
-                    if (!preloadedVideos.has(videoSrc)) {
-                        preloadVideo(videoSrc);
-                    }
-                });
+            // 暂停当前视频
+            videoPlayer.pause();
+            
+            // 更新视频源
+            videoPlayer.src = videoSrc;
+            
+            // 加载新视频
+            videoPlayer.load();
+            
+            // 尝试播放新视频
+            videoPlayer.play().catch(error => {
+                // 自动播放被阻止时，浏览器会显示播放控件，用户可手动点击
+                console.error('自动播放失败:', error);
             });
-            
-            function preloadVideo(url) {
-                const xhr = new XMLHttpRequest();
-                xhr.open('GET', url, true);
-                xhr.responseType = 'blob';
-                
-                xhr.onload = function() {
-                    if (this.status === 200) {
-                        const blob = this.response;
-                        const videoURL = URL.createObjectURL(blob);
-                        preloadedVideos.set(url, videoURL);
-                        console.log('预加载成功:', url);
-                    }
-                };
-                
-                xhr.onerror = function() {
-                    console.warn('预加载失败:', url);
-                };
-                
-                xhr.send();
-            }
-            
-            // 重写playVideo函数以使用预加载的视频
-            window.playVideo = function(videoSrc, videoTitle) {
-                const videoPlayer = document.getElementById('main-video');
-                const videoTitleElement = document.getElementById('current-video-title');
-                
-                // 如果有预加载的Blob URL，优先使用
-                if (preloadedVideos.has(videoSrc)) {
-                    videoPlayer.src = preloadedVideos.get(videoSrc);
-                } else {
-                    videoPlayer.src = videoSrc;
-                    // 同时后台预加载
-                    preloadVideo(videoSrc);
-                }
-                
-                // 更新视频标题
-                videoTitleElement.textContent = videoTitle;
-                // 播放视频
-                const playPromise = videoPlayer.play();
-                
-                if (playPromise !== undefined) {
-                    playPromise.catch(error => {
-                        console.log('自动播放被阻止，用户需要手动点击播放');
-                    });
-                }
-            };
-        });
+        }
         
         // 添加错误处理
         document.getElementById('main-video').addEventListener('error', function(e) {
+            const errorElement = document.getElementById('current-video-title');
+            errorElement.textContent = '视频加载失败';
             console.error('视频加载错误:', e);
             alert('视频加载失败，请检查文件路径和格式。');
-        });
-        
-        // 清理Blob URL防止内存泄漏
-        window.addEventListener('beforeunload', () => {
-            // 这里可以添加清理预加载的Blob URL的代码
-            // 但由于在Map中存储，页面关闭时会自动清理
         });
     </script>
 </body>
