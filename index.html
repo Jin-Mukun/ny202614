@@ -1,4 +1,14 @@
 <!DOCTYPE html>
+<!-- 
+  最终版 - NY2026十四班逆天视频网站
+  优化内容：
+  1. 修复视频加载只能播放前几秒的问题
+  2. 优化视频加载速度和性能
+  3. 添加实时加载状态反馈
+  4. 完善错误处理机制
+  5. 防重复点击保护
+  6. 移动端兼容性优化
+-->
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -56,6 +66,9 @@
             max-width: 800px;
             display: block;
             margin: 0 auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            background-color: #000;
         }
         
         /* 视频列表 */
@@ -73,7 +86,9 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             width: 300px;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: transform 0.2s ease;
+            will-change: transform;
+            backface-visibility: hidden;
         }
         
         .video-item:hover {
@@ -84,6 +99,31 @@
             font-size: 18px;
             margin: 10px 0;
             color: #333;
+        }
+
+        /* 加载状态样式 */
+        .loading-status {
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+            text-align: center;
+        }
+        
+        .loading-bar {
+            width: 100%;
+            height: 4px;
+            background-color: #f0f0f0;
+            border-radius: 2px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        
+        .loading-progress {
+            height: 100%;
+            background-color: #007bff;
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 2px;
         }
         
         footer {
@@ -111,10 +151,20 @@
         <!-- 视频播放器 -->
         <section class="video-player">
             <h2 class="video-title" id="current-video-title">video1</h2>
-            <video id="main-video" controls>
+            <video id="main-video" 
+                   controls 
+                   preload="metadata"
+                   playsinline
+                   poster="">
                 <source src="videos/video1.mp4" type="video/mp4">
                 您的浏览器不支持视频播放，请使用现代浏览器。
             </video>
+            <div class="loading-status" id="loading-status">
+                准备就绪
+            </div>
+            <div class="loading-bar" id="loading-bar" style="display: none;">
+                <div class="loading-progress" id="loading-progress"></div>
+            </div>
         </section>
 
         <!-- 视频列表 -->
@@ -148,36 +198,193 @@
     </footer>
 
     <script>
-        // 主播放函数 (修复版)
+        // 视频播放器引用
+        const videoPlayer = document.getElementById('main-video');
+        const videoTitleElement = document.getElementById('current-video-title');
+        const loadingStatus = document.getElementById('loading-status');
+        const loadingBar = document.getElementById('loading-bar');
+        const loadingProgress = document.getElementById('loading-progress');
+
+        // 防止快速连续点击的变量
+        let isLoading = false;
+
+        // 优化后的主播放函数
         function loadAndPlayVideo(videoSrc, videoTitle) {
-            const videoPlayer = document.getElementById('main-video');
-            const videoTitleElement = document.getElementById('current-video-title');
+            // 防止快速连续点击
+            if (isLoading) return;
             
-            // 立即更新标题，避免闪烁
-            videoTitleElement.textContent = videoTitle;
+            // 验证视频源
+            if (!videoSrc || typeof videoSrc !== 'string') {
+                console.error('无效的视频源:', videoSrc);
+                return;
+            }
+            
+            isLoading = true;
+            
+            // 立即更新标题
+            videoTitleElement.textContent = videoTitle || '未知视频';
             
             // 暂停当前视频
-            videoPlayer.pause();
+            if (!videoPlayer.paused) {
+                videoPlayer.pause();
+            }
             
-            // 更新视频源
-            videoPlayer.src = videoSrc;
+            // 显示加载状态
+            showLoadingStatus();
             
-            // 加载新视频
-            videoPlayer.load();
+            // 清空现有源并设置新源
+            try {
+                const source = videoPlayer.querySelector('source');
+                if (source) {
+                    source.src = videoSrc;
+                } else {
+                    videoPlayer.src = videoSrc;
+                }
+                
+                // 重新加载
+                videoPlayer.load();
+            } catch (error) {
+                console.error('设置视频源时出错:', error);
+                hideLoadingStatus();
+                videoTitleElement.textContent = videoTitle + ' (设置失败)';
+                isLoading = false;
+            }
+        }
+
+        // 显示加载状态
+        function showLoadingStatus() {
+            loadingStatus.textContent = '正在加载...';
+            loadingBar.style.display = 'block';
+            loadingProgress.style.width = '0%';
+        }
+
+        // 隐藏加载状态
+        function hideLoadingStatus() {
+            loadingBar.style.display = 'none';
+            loadingProgress.style.width = '100%';
             
-            // 尝试播放新视频
-            videoPlayer.play().catch(error => {
-                // 自动播放被阻止时，浏览器会显示播放控件，用户可手动点击
-                console.error('自动播放失败:', error);
+            // 使用requestAnimationFrame确保状态更新
+            requestAnimationFrame(() => {
+                loadingStatus.textContent = '准备就绪';
             });
         }
-        
-        // 添加错误处理
-        document.getElementById('main-video').addEventListener('error', function(e) {
-            const errorElement = document.getElementById('current-video-title');
-            errorElement.textContent = '视频加载失败';
-            console.error('视频加载错误:', e);
-            alert('视频加载失败，请检查文件路径和格式。');
+
+        // 视频事件监听器集合
+        function setupVideoEventListeners() {
+            // 监听加载进度
+            videoPlayer.addEventListener('progress', function() {
+                if (videoPlayer.buffered.length > 0 && videoPlayer.duration > 0) {
+                    try {
+                        const bufferedEnd = videoPlayer.buffered.end(videoPlayer.buffered.length - 1);
+                        const duration = videoPlayer.duration;
+                        if (duration !== Infinity && duration > 0) {
+                            const progressPercent = (bufferedEnd / duration) * 100;
+                            if (!isNaN(progressPercent)) {
+                                loadingProgress.style.width = Math.min(progressPercent, 100) + '%';
+                            }
+                        }
+                    } catch (error) {
+                        console.warn('计算加载进度时出错:', error);
+                    }
+                }
+            });
+
+            // 监听网络缓冲状态
+            videoPlayer.addEventListener('waiting', function() {
+                if (loadingBar.style.display !== 'none') {
+                    loadingStatus.textContent = '缓冲中...';
+                }
+            });
+
+            videoPlayer.addEventListener('canplay', function() {
+                if (loadingBar.style.display !== 'none') {
+                    loadingStatus.textContent = '可以播放';
+                }
+            });
+
+            videoPlayer.addEventListener('playing', function() {
+                hideLoadingStatus();
+            });
+
+            // 元数据加载完成
+            videoPlayer.addEventListener('loadedmetadata', function() {
+                hideLoadingStatus();
+                isLoading = false;
+            });
+
+            // 视频结束处理
+            videoPlayer.addEventListener('ended', function() {
+                loadingStatus.textContent = '播放完成';
+                setTimeout(() => {
+                    loadingStatus.textContent = '准备就绪';
+                }, 2000);
+            });
+
+            // 错误处理
+            videoPlayer.addEventListener('error', function(e) {
+                hideLoadingStatus();
+                isLoading = false;
+                
+                let errorMsg = '视频加载失败';
+                if (videoPlayer.error) {
+                    switch (videoPlayer.error.code) {
+                        case 1:
+                            errorMsg = '视频加载被中止';
+                            break;
+                        case 2:
+                            errorMsg = '网络错误，请检查连接';
+                            break;
+                        case 3:
+                            errorMsg = '视频格式不支持';
+                            break;
+                        case 4:
+                            errorMsg = '视频源不可用';
+                            break;
+                        default:
+                            errorMsg = '未知错误';
+                    }
+                }
+                
+                videoTitleElement.textContent = errorMsg;
+                console.error('视频加载错误:', e, '错误代码:', videoPlayer.error?.code);
+            });
+        }
+
+        // 页面加载时的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 设置视频事件监听器
+            setupVideoEventListeners();
+            
+            // 初始加载状态
+            showLoadingStatus();
+            
+            // 检查视频是否已经加载
+            if (videoPlayer.readyState >= 1) {
+                hideLoadingStatus();
+            }
+            
+            // 确保视频元素存在
+            if (!videoPlayer || !videoTitleElement) {
+                console.error('关键元素未找到');
+                return;
+            }
+            
+            // 设置默认视频属性
+            videoPlayer.setAttribute('playsinline', 'true');
+            videoPlayer.setAttribute('preload', 'metadata');
+            
+            console.log('视频网站初始化完成');
+        });
+
+        // 全局错误处理
+        window.addEventListener('error', function(e) {
+            console.error('全局错误:', e.error);
+        });
+
+        // 全局未处理的Promise拒绝
+        window.addEventListener('unhandledrejection', function(e) {
+            console.error('未处理的Promise拒绝:', e.reason);
+            e.preventDefault(); // 防止在控制台显示错误
         });
     </script>
 </body>
