@@ -8,6 +8,7 @@
   4. 完善错误处理机制
   5. 防重复点击保护
   6. 移动端兼容性优化
+  7. 修复视频切换时的状态重置问题
 -->
 <html lang="zh-CN">
 <head>
@@ -154,8 +155,7 @@
             <video id="main-video" 
                    controls 
                    preload="metadata"
-                   playsinline
-                   poster="">
+                   playsinline>
                 <source src="videos/video1.mp4" type="video/mp4">
                 您的浏览器不支持视频播放，请使用现代浏览器。
             </video>
@@ -208,7 +208,7 @@
         // 防止快速连续点击的变量
         let isLoading = false;
 
-        // 优化后的主播放函数
+        // 优化后的主播放函数 - 修复状态重置问题
         function loadAndPlayVideo(videoSrc, videoTitle) {
             // 防止快速连续点击
             if (isLoading) return;
@@ -224,27 +224,44 @@
             // 立即更新标题
             videoTitleElement.textContent = videoTitle || '未知视频';
             
-            // 暂停当前视频
-            if (!videoPlayer.paused) {
-                videoPlayer.pause();
-            }
-            
-            // 显示加载状态
-            showLoadingStatus();
-            
-            // 清空现有源并设置新源
+            // 完全重置视频状态 - 关键修复
             try {
-                const source = videoPlayer.querySelector('source');
-                if (source) {
-                    source.src = videoSrc;
-                } else {
-                    videoPlayer.src = videoSrc;
+                // 1. 暂停当前播放
+                videoPlayer.pause();
+                
+                // 2. 清除当前时间和所有缓存
+                videoPlayer.currentTime = 0;
+                videoPlayer.removeAttribute('src');
+                
+                // 3. 清除所有source元素（保留fallback文本）
+                const fallbackText = videoPlayer.querySelector('p') || videoPlayer.lastChild;
+                while (videoPlayer.firstChild) {
+                    videoPlayer.removeChild(videoPlayer.firstChild);
                 }
                 
-                // 重新加载
+                // 4. 重新创建source元素
+                const newSource = document.createElement('source');
+                newSource.src = videoSrc;
+                newSource.type = 'video/mp4';
+                videoPlayer.appendChild(newSource);
+                
+                // 5. 重新添加fallback文本
+                if (fallbackText && fallbackText.nodeType === Node.TEXT_NODE) {
+                    videoPlayer.appendChild(fallbackText);
+                } else {
+                    const fallback = document.createElement('p');
+                    fallback.textContent = '您的浏览器不支持视频播放，请使用现代浏览器。';
+                    videoPlayer.appendChild(fallback);
+                }
+                
+                // 6. 显示加载状态
+                showLoadingStatus();
+                
+                // 7. 重新加载
                 videoPlayer.load();
+                
             } catch (error) {
-                console.error('设置视频源时出错:', error);
+                console.error('重置视频状态时出错:', error);
                 hideLoadingStatus();
                 videoTitleElement.textContent = videoTitle + ' (设置失败)';
                 isLoading = false;
@@ -369,9 +386,8 @@
                 return;
             }
             
-            // 设置默认视频属性
+            // 只设置playsinline，不重复设置preload
             videoPlayer.setAttribute('playsinline', 'true');
-            videoPlayer.setAttribute('preload', 'metadata');
             
             console.log('视频网站初始化完成');
         });
