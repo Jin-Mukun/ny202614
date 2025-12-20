@@ -260,6 +260,14 @@
                 // 4. 加载新视频（在更新 <source> 后调用）
                 try {
                     videoPlayer.load();
+                    // 尝试在加载后自动播放（在用户交互时通常被允许）
+                    try {
+                        videoPlayer.play().catch(err => {
+                            console.warn('自动播放被阻止或失败:', err);
+                        });
+                    } catch (playErr) {
+                        console.warn('调用 play() 时出错:', playErr);
+                    }
                 } catch (loadErr) {
                     // 有些环境可能在同步调用 load 时抛出，记录但继续执行
                     console.warn('调用 load() 时遇到问题:', loadErr);
@@ -346,6 +354,13 @@
             videoPlayer.addEventListener('loadedmetadata', function () {
                 hideLoadingStatus();
                 isLoading = false;
+                try {
+                    videoPlayer.play().catch(err => {
+                        console.warn('loadedmetadata 后尝试播放被阻止或失败:', err);
+                    });
+                } catch (e) {
+                    console.warn('调用 play() 时出错:', e);
+                }
             });
 
             // 视频结束处理
@@ -398,7 +413,15 @@
 
                         // 尝试重新加载
                         setTimeout(() => {
-                            videoPlayer.load();
+                            // 优先尝试恢复播放而不是直接 reload，以避免重置播放进度
+                            try {
+                                videoPlayer.play().catch(err => {
+                                    console.warn('在 stalled 后尝试恢复播放失败:', err);
+                                    try { videoPlayer.load(); } catch (e) { /* 忽略 */ }
+                                });
+                            } catch (e) {
+                                try { videoPlayer.load(); } catch (e2) { /* 忽略 */ }
+                            }
                         }, 1000);
                     }
                 } else {
