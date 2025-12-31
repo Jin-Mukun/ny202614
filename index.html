@@ -4,505 +4,591 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NY2026十四班逆天视频</title>
+    <meta name="description" content="NY 2026.14班宣传网站 — 班级活动、视频与图片展示，助力中考，记录精彩瞬间。">
+    <title>NY 2026.14班宣传网站</title>
     <style>
-        /* 基本样式 */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f5f5f5;
-            line-height: 1.6;
+        :root {
+            /* 浅色系 iOS 26 概念色盘 */
+            --glass-bg: rgba(255, 255, 255, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.8);
+            --accent-primary: #3b82f6;
+            --accent-gradient: linear-gradient(135deg, #2563eb, #7c3aed);
+            --text-primary: #1f2937;
+            --text-secondary: rgba(55, 65, 81, 0.75);
+            --radius-xl: 24px;
+            --radius-md: 16px;
+            --page-bg: #f3f4f6;
         }
 
-        header {
-            background-color: #333;
-            color: white;
-            padding: 20px;
-            text-align: center;
+        /* -------------------
+           基础设置
+           ------------------- */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--page-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* -------------------
+           动态液态背景 (GPU加速优化)
+           ------------------- */
+        .liquid-orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.6;
+            will-change: transform;
+            /* 性能优化 */
+            animation: float-liquid 25s infinite ease-in-out alternate;
+        }
+
+        .orb-1 {
+            top: -10%;
+            left: -10%;
+            width: 60vw;
+            height: 60vw;
+            background: radial-gradient(circle, #a5b4fc, transparent);
+        }
+
+        .orb-2 {
+            bottom: -10%;
+            right: -10%;
+            width: 60vw;
+            height: 60vw;
+            background: radial-gradient(circle, #93c5fd, transparent);
+            animation-delay: -5s;
+        }
+
+        .orb-3 {
+            top: 30%;
+            left: 30%;
+            width: 50vw;
+            height: 50vw;
+            background: radial-gradient(circle, #f9a8d4, transparent);
+            animation-duration: 35s;
+        }
+
+        @keyframes float-liquid {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            50% {
+                transform: translate(30px, -30px) scale(1.05);
+            }
+
+            100% {
+                transform: translate(-20px, 20px) scale(0.95);
+            }
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 20px 20px 60px;
+            position: relative;
+            z-index: 10;
         }
 
-        /* 可编辑文字区域 */
-        .editable-section {
-            background-color: white;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        /* -------------------
+           新布局：Hero Section (左右分栏)
+           ------------------- */
+        .hero-section {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            /* 左侧文字占少部分，右侧轮播占多部分 */
+            gap: 40px;
+            align-items: center;
+            margin-bottom: 50px;
+            margin-top: 30px;
         }
 
-        /* 视频播放区域 */
+        /* 左侧内容区 */
+        .hero-text-wrapper {
+            background: var(--glass-bg);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.03);
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .hero-title {
+            margin: 0 0 15px 0;
+            font-size: 2.2rem;
+            /* 放大标题 */
+            font-weight: 800;
+            line-height: 1.2;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .hero-slogan {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-top: 10px;
+        }
+
+        /* 右侧轮播区 */
+        .hero-carousel-wrapper {
+            position: relative;
+            height: 320px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* 防止轮播项向左溢出覆盖左侧文字 */
+            overflow: hidden;
+        }
+
+        /* -------------------
+           3D Coverflow 轮播组件
+           ------------------- */
+        .carousel-section {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 1000px;
+        }
+
+        .carousel-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transform-style: preserve-3d;
+        }
+
+        .carousel-item {
+            position: absolute;
+            width: 280px;
+            /* 稍微调小以适应布局 */
+            height: 180px;
+            border-radius: 12px;
+            background-color: #ddd;
+            background-size: cover;
+            background-position: center;
+            transition: all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+            will-change: transform, opacity;
+            /* 性能优化 */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            opacity: 0;
+            transform: translateX(0) scale(0.8);
+            z-index: 1;
+        }
+
+        .carousel-item::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 0;
+            right: 0;
+            height: 20px;
+            background: inherit;
+            filter: blur(4px) brightness(0.7);
+            opacity: 0.3;
+            transform: scaleY(-1);
+            mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), transparent);
+            -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), transparent);
+            border-radius: 0 0 12px 12px;
+            z-index: -1;
+        }
+
+        /* 轮播位置状态 */
+        .carousel-item.pos-1 {
+            transform: translateX(-280px) scale(0.7);
+            opacity: 0.5;
+            z-index: 2;
+            filter: blur(2px);
+        }
+
+        .carousel-item.pos-2 {
+            transform: translateX(-140px) scale(0.85);
+            opacity: 0.8;
+            z-index: 3;
+            filter: blur(0.5px);
+        }
+
+        .carousel-item.pos-3 {
+            transform: translateX(0) scale(1.15);
+            opacity: 1;
+            z-index: 10;
+            box-shadow: 0 20px 40px rgba(59, 130, 246, 0.25);
+            border-color: #fff;
+            filter: none;
+        }
+
+        .carousel-item.pos-4 {
+            transform: translateX(140px) scale(0.85);
+            opacity: 0.8;
+            z-index: 3;
+            filter: blur(0.5px);
+        }
+
+        .carousel-item.pos-5 {
+            transform: translateX(280px) scale(0.7);
+            opacity: 0.5;
+            z-index: 2;
+            filter: blur(2px);
+        }
+
+        /* -------------------
+           视频播放器
+           ------------------- */
+        .video-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+
+        h2.section-title {
+            font-size: 1.5rem;
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            font-weight: 700;
+            padding-left: 10px;
+            border-left: 4px solid var(--accent-primary);
+        }
+
         .video-player {
-            background-color: white;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 0;
+            overflow: hidden;
+            position: relative;
+            background: #000;
+            max-width: 900px;
+            margin: 0 auto;
+            border-radius: var(--radius-md);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .video-header-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 15px 25px;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), transparent);
+            z-index: 5;
+            pointer-events: none;
         }
 
         .video-title {
-            font-size: 24px;
-            margin-bottom: 15px;
-            color: #333;
+            font-size: 1.1rem;
+            margin: 0;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
         }
 
         video {
             width: 100%;
-            max-width: 800px;
+            max-height: 65vh;
             display: block;
-            margin: 0 auto;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            background-color: #000;
         }
 
-        /* 视频列表 */
-        .video-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            margin-top: 30px;
-        }
-
-        .video-item {
-            background-color: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            width: 300px;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-            will-change: transform;
-            backface-visibility: hidden;
-        }
-
-        .video-item:hover {
-            transform: translateY(-5px);
-        }
-
-        .video-item-title {
-            font-size: 18px;
-            margin: 10px 0;
-            color: #333;
-        }
-
-        /* 加载状态样式 */
-        .loading-status {
-            font-size: 14px;
-            color: #666;
-            margin-top: 10px;
-            text-align: center;
+        .controls-area {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.95);
         }
 
         .loading-bar {
             width: 100%;
-            height: 4px;
-            background-color: #f0f0f0;
+            height: 3px;
+            background-color: #e5e7eb;
             border-radius: 2px;
-            margin-top: 10px;
+            margin-top: 8px;
             overflow: hidden;
         }
 
         .loading-progress {
             height: 100%;
-            background-color: #007bff;
+            background: var(--accent-primary);
             width: 0%;
             transition: width 0.3s ease;
-            border-radius: 2px;
+        }
+
+        .loading-status {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        /* -------------------
+           视频列表
+           ------------------- */
+        .video-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        .video-item {
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid #fff;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+            will-change: transform;
+        }
+
+        .video-item:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 12px 25px rgba(59, 130, 246, 0.15);
+            border-color: var(--accent-primary);
+        }
+
+        .video-item-cover {
+            height: 130px;
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .video-item-cover::after {
+            content: '▶';
+            font-size: 20px;
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-primary);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
+        }
+
+        .video-item:hover .video-item-cover::after {
+            transform: scale(1.1);
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .video-item-content {
+            padding: 15px;
+        }
+
+        .video-item-title {
+            font-size: 1rem;
+            margin: 0 0 5px 0;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .video-item p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin: 0;
         }
 
         footer {
             text-align: center;
-            padding: 20px;
-            margin-top: 40px;
-            color: #666;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            margin-top: 20px;
+        }
+
+        footer a {
+            color: var(--accent-primary);
+            text-decoration: none;
+        }
+
+        /* 响应式适配 */
+        @media (max-width: 900px) {
+            .hero-section {
+                grid-template-columns: 1fr;
+                /* 变为单列 */
+                gap: 30px;
+                text-align: center;
+            }
+
+            .hero-text-wrapper {
+                align-items: center;
+                text-align: center;
+            }
+
+            .hero-title {
+                font-size: 1.8rem;
+            }
+
+            .carousel-item {
+                width: 220px;
+                height: 140px;
+            }
+
+            .carousel-item.pos-1 {
+                transform: translateX(-180px) scale(0.7);
+                opacity: 0;
+            }
+
+            /* 隐藏边缘 */
+            .carousel-item.pos-2 {
+                transform: translateX(-110px) scale(0.85);
+            }
+
+            .carousel-item.pos-3 {
+                transform: translateX(0) scale(1.1);
+            }
+
+            .carousel-item.pos-4 {
+                transform: translateX(110px) scale(0.85);
+            }
+
+            .carousel-item.pos-5 {
+                transform: translateX(180px) scale(0.7);
+                opacity: 0;
+            }
         }
     </style>
 </head>
 
 <body>
-    <!-- 顶部标题 -->
-    <header>
-        <h1>NY2026十四班逆天视频网站</h1>
-    </header>
+    <!-- 动态背景层 -->
+    <div class="liquid-orb orb-1"></div>
+    <div class="liquid-orb orb-2"></div>
+    <div class="liquid-orb orb-3"></div>
 
     <div class="container">
-        <!-- 可编辑文字区域 -->
-        <section class="editable-section">
-            <h2>欢迎来到NY2026十四班官方网站</h2>
-            <p>这里有逆天的超人视频。</p>
-            <!-- 你可以直接编辑这里的文字内容 -->
-        </section>
 
-        <!-- 视频播放器 -->
-        <section class="video-player">
-            <h2 class="video-title" id="current-video-title">正在准备…</h2>
-            <video id="main-video" controls controlsList="nodownload" preload="auto" playsinline
-                oncontextmenu="return false;">
-                <source src="videos/video1.mp4" type="video/mp4">
-                您的浏览器不支持视频播放，请使用现代浏览器。
-            </video>
-            <div class="loading-status" id="loading-status">
-                准备就绪
+        <!-- 新布局：Hero Section (左文右图) -->
+        <div class="hero-section">
+            <!-- 左侧：标题和欢迎语 -->
+            <div class="hero-text-wrapper">
+                <h1 class="hero-title">NY 2026.14班<br>宣传网站</h1>
+                <div class="hero-subtitle">欢迎来到NY2026十四班官方网站</div>
+                <div class="hero-slogan">2026中考加油!!! </div>
             </div>
-            <div class="loading-bar" id="loading-bar" style="display: none;">
-                <div class="loading-progress" id="loading-progress"></div>
+
+            <!-- 右侧：3D轮播 -->
+            <div class="hero-carousel-wrapper">
+                <section class="carousel-section">
+                    <div class="carousel-container" id="carousel">
+                        <div class="carousel-item pos-1" style="background-image: url('pictures/picture1.jpg');"></div>
+                        <div class="carousel-item pos-2" style="background-image: url('pictures/picture2.jpg');"></div>
+                        <div class="carousel-item pos-3" style="background-image: url('pictures/picture3.jpg');"></div>
+                        <div class="carousel-item pos-4" style="background-image: url('pictures/picture4.jpg');"></div>
+                        <div class="carousel-item pos-5" style="background-image: url('pictures/picture5.jpg');"></div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- 视频播放器区域 -->
+        <section class="video-section">
+            <h2 class="section-title">播放视频</h2>
+            <div class="video-player">
+                <div class="video-header-overlay">
+                    <h2 class="video-title" id="current-video-title">正在准备…</h2>
+                </div>
+
+                <!-- 性能优化：preload="metadata" 懒加载 -->
+                <video id="main-video" controls controlsList="nodownload" preload="metadata" playsinline
+                    oncontextmenu="return false;">
+                    <source src="videos/video1.mp4" type="video/mp4">
+                    <track kind="captions" srclang="zh" label="中文" src="videos/captions-zh.vtt">
+                    您的浏览器不支持视频播放，请使用现代浏览器。
+                </video>
+
+                <div class="controls-area">
+                    <div class="loading-status" id="loading-status">准备就绪</div>
+                    <div class="loading-bar" id="loading-bar" style="display: none;">
+                        <div class="loading-progress" id="loading-progress"></div>
+                    </div>
+                </div>
             </div>
         </section>
 
         <!-- 视频列表 -->
-        <section>
-            <h2>视频列表</h2>
+        <section class="video-section">
+            <h2 class="section-title">视频列表</h2>
             <div class="video-list">
-                <!-- 视频1 -->
-                <div class="video-item" onclick="loadAndPlayVideo('videos/video1.mp4')">
-                    <h3 class="video-item-title">v1</h3>
-                    <p>这是原始鼻祖，也是目前的巅峰之作<br>(拍摄于2025.01.06)</p>
+                <div class="video-item" role="button" tabindex="0" data-src="videos/video1.mp4">
+                    <div class="video-item-cover"></div>
+                    <div class="video-item-content">
+                        <h3 class="video-item-title">v1</h3>
+                        <p>这是原始鼻祖，也是目前的巅峰之作<br>(拍摄于2025.01.06)</p>
+                    </div>
                 </div>
-
-                <!-- 视频2 -->
-                <div class="video-item" onclick="loadAndPlayVideo('videos/video2.mp4')">
-                    <h3 class="video-item-title">v2</h3>
-                    <p>水哥...<br>(拍摄于2025.11.11)</p>
+                <div class="video-item" role="button" tabindex="0" data-src="videos/video2.mp4">
+                    <div class="video-item-cover"></div>
+                    <div class="video-item-content">
+                        <h3 class="video-item-title">v2</h3>
+                        <p>水哥...<br>(拍摄于2025.11.11)</p>
+                    </div>
                 </div>
-
-                <!-- 视频3 -->
-                <div class="video-item" onclick="loadAndPlayVideo('videos/video3.mp4')">
-                    <h3 class="video-item-title">v3</h3>
-                    <p>谁说战神超不了简？<br>(拍摄于2025.12.09)</p>
+                <div class="video-item" role="button" tabindex="0" data-src="videos/video3.mp4">
+                    <div class="video-item-cover"></div>
+                    <div class="video-item-content">
+                        <h3 class="video-item-title">v3</h3>
+                        <p>谁说战神超不了简？<br>(拍摄于2025.12.09)</p>
+                    </div>
                 </div>
-
-                <!-- 视频4 -->
-                <div class="video-item" onclick="loadAndPlayVideo('videos/video4.mp4')">
-                    <h3 class="video-item-title">v4</h3>
-                    <p>男厕所世界大战<br>(拍摄于2025.12.18)</p>
+                <div class="video-item" role="button" tabindex="0" data-src="videos/video4.mp4">
+                    <div class="video-item-cover"></div>
+                    <div class="video-item-content">
+                        <h3 class="video-item-title">v4</h3>
+                        <p>男厕所世界大战<br>(拍摄于2025.12.18)</p>
+                    </div>
                 </div>
-
-                <!-- 视频5 -->
-                <div class="video-item" onclick="loadAndPlayVideo('videos/video5.mp4')">
-                    <h3 class="video-item-title">v5</h3>
-                    <p>书接上回<br>(拍摄于2025.12.18)</p>
+                <div class="video-item" role="button" tabindex="0" data-src="videos/video5.mp4">
+                    <div class="video-item-cover"></div>
+                    <div class="video-item-content">
+                        <h3 class="video-item-title">v5</h3>
+                        <p>书接上回<br>(拍摄于2025.12.18)</p>
+                    </div>
                 </div>
             </div>
         </section>
     </div>
 
-    <!-- 页脚 -->
     <footer>
-        <p>© 2025 NY2026十四班逆天视频网站 | 官方精选</p>
+        <p>Copyright © 2025-2026 The Walking Cockpit. All rights reserved.</p>
         <p><a href="https://github.com/Jin-Mukun/ny202614" target="_blank"
                 rel="noopener noreferrer">本网站开源：https://github.com/Jin-Mukun/ny202614</a></p>
     </footer>
 
-    <script>
-        // 视频播放器引用
-        const videoPlayer = document.getElementById('main-video');
-        const videoTitleElement = document.getElementById('current-video-title');
-        const loadingStatus = document.getElementById('loading-status');
-        const loadingBar = document.getElementById('loading-bar');
-        const loadingProgress = document.getElementById('loading-progress');
-
-        // 防止快速连续点击的变量
-        let isLoading = false;
-        let stalledCount = 0;
-        const MAX_STALLED_RETRIES = 3;
-
-        // 视频路径 -> 显示标题 的映射表
-        const TITLE_MAP = {
-            'videos/video1.mp4': '入站必刷',
-            'videos/video2.mp4': '扫地机器人测评',
-            'videos/video3.mp4': '战神反击战1',
-            'videos/video4.mp4': '厕所二战',
-            'videos/video5.mp4': '战神反击战2'
-        };
-
-        // 简化的主播放函数 - 解决播放中断问题
-        function loadAndPlayVideo(videoSrc, videoTitle) {
-            // 防止快速连续点击
-            if (isLoading) return;
-
-            // 验证视频源
-            if (!videoSrc || typeof videoSrc !== 'string') {
-                console.error('无效的视频源:', videoSrc);
-                return;
-            }
-
-            isLoading = true;
-            stalledCount = 0; // 重置缓冲失败计数
-
-            // 立即更新标题：优先使用传入参数，其次使用映射表，最后回退到未知
-            const mappedTitle = TITLE_MAP[videoSrc];
-            const titleToShow = videoTitle || mappedTitle || '未知视频';
-            videoTitleElement.textContent = titleToShow;
-
-            // 简化的视频切换逻辑
-            try {
-                // 1. 暂停当前播放
-                videoPlayer.pause();
-
-                // 2. 更新 <source> 元素的 src（更兼容于某些浏览器实现）；若不存在则回退到直接设置 video.src
-                const sourceEl = videoPlayer.querySelector('source');
-                if (sourceEl) {
-                    sourceEl.setAttribute('src', videoSrc);
-                } else {
-                    videoPlayer.src = videoSrc;
-                }
-
-                // 3. 显示加载状态
-                showLoadingStatus();
-
-                // 4. 加载新视频（在更新 <source> 后调用）
-                try {
-                    videoPlayer.load();
-                    // 尝试在加载后自动播放（在用户交互时通常被允许）
-                    try {
-                        videoPlayer.play().catch(err => {
-                            console.warn('自动播放被阻止或失败:', err);
-                        });
-                    } catch (playErr) {
-                        console.warn('调用 play() 时出错:', playErr);
-                    }
-                } catch (loadErr) {
-                    // 有些环境可能在同步调用 load 时抛出，记录但继续执行
-                    console.warn('调用 load() 时遇到问题:', loadErr);
-                }
-
-                // 5. 尝试重置播放位置；如果在元数据加载前设置会抛错，则在 loadedmetadata 后再设置一次
-                try {
-                    videoPlayer.currentTime = 0;
-                } catch (e) {
-                    console.warn('无法立即设置 currentTime，等待元数据加载后重置:', e);
-                    const onLoadedMeta = function () {
-                        try { videoPlayer.currentTime = 0; } catch (err) { /* 忽略 */ }
-                        videoPlayer.removeEventListener('loadedmetadata', onLoadedMeta);
-                    };
-                    videoPlayer.addEventListener('loadedmetadata', onLoadedMeta);
-                }
-
-            } catch (error) {
-                console.error('切换视频时出错:', error);
-                hideLoadingStatus();
-                videoTitleElement.textContent = videoTitle + ' (加载失败)';
-                isLoading = false;
-                stalledCount = 0;
-            }
-        }
-
-        // 显示加载状态
-        function showLoadingStatus() {
-            loadingStatus.textContent = '正在加载...';
-            loadingBar.style.display = 'block';
-            loadingProgress.style.width = '0%';
-        }
-
-        // 隐藏加载状态
-        function hideLoadingStatus() {
-            loadingBar.style.display = 'none';
-            loadingProgress.style.width = '100%';
-
-            // 使用requestAnimationFrame确保状态更新
-            requestAnimationFrame(() => {
-                loadingStatus.textContent = '准备就绪';
-            });
-        }
-
-        // 视频事件监听器集合
-        function setupVideoEventListeners() {
-            // 监听加载进度
-            videoPlayer.addEventListener('progress', function () {
-                if (videoPlayer.buffered.length > 0 && videoPlayer.duration > 0) {
-                    try {
-                        const bufferedEnd = videoPlayer.buffered.end(videoPlayer.buffered.length - 1);
-                        const duration = videoPlayer.duration;
-                        if (duration !== Infinity && duration > 0) {
-                            const progressPercent = (bufferedEnd / duration) * 100;
-                            if (!isNaN(progressPercent)) {
-                                loadingProgress.style.width = Math.min(progressPercent, 100) + '%';
-                            }
-                        }
-                    } catch (error) {
-                        console.warn('计算加载进度时出错:', error);
-                    }
-                }
-            });
-
-            // 监听网络缓冲状态
-            videoPlayer.addEventListener('waiting', function () {
-                if (loadingBar.style.display !== 'none') {
-                    loadingStatus.textContent = '缓冲中...';
-                }
-            });
-
-            videoPlayer.addEventListener('canplay', function () {
-                if (loadingBar.style.display !== 'none') {
-                    loadingStatus.textContent = '可以播放';
-                }
-            });
-
-            videoPlayer.addEventListener('playing', function () {
-                hideLoadingStatus();
-                stalledCount = 0; // 重置缓冲失败计数
-            });
-
-            // 元数据加载完成
-            videoPlayer.addEventListener('loadedmetadata', function () {
-                hideLoadingStatus();
-                isLoading = false;
-                try {
-                    videoPlayer.play().catch(err => {
-                        console.warn('loadedmetadata 后尝试播放被阻止或失败:', err);
-                    });
-                } catch (e) {
-                    console.warn('调用 play() 时出错:', e);
-                }
-            });
-
-            // 视频结束处理
-            videoPlayer.addEventListener('ended', function () {
-                loadingStatus.textContent = '播放完成';
-                setTimeout(() => {
-                    loadingStatus.textContent = '准备就绪';
-                }, 2000);
-            });
-
-            // 错误处理
-            videoPlayer.addEventListener('error', function (e) {
-                console.error('视频加载错误:', e, '错误代码:', (videoPlayer.error && videoPlayer.error.code));
-
-                let errorMsg = '视频加载失败';
-                if (videoPlayer.error) {
-                    switch (videoPlayer.error.code) {
-                        case 1:
-                            errorMsg = '视频加载被中止';
-                            break;
-                        case 2:
-                            errorMsg = '网络错误，请检查连接';
-                            break;
-                        case 3:
-                            errorMsg = '视频格式不支持';
-                            break;
-                        case 4:
-                            errorMsg = '视频源不可用';
-                            break;
-                        default:
-                            errorMsg = '未知错误';
-                    }
-                }
-
-                videoTitleElement.textContent = errorMsg;
-                hideLoadingStatus();
-                isLoading = false;
-                stalledCount = 0; // 重置计数
-            });
-
-            // 添加视频缓冲监听，防止播放中断
-            videoPlayer.addEventListener('stalled', function () {
-                stalledCount++;
-                console.warn('视频缓冲中断，第' + stalledCount + '次尝试重新加载...');
-
-                if (stalledCount <= MAX_STALLED_RETRIES) {
-                    if (!isLoading) {
-                        showLoadingStatus();
-                        loadingStatus.textContent = '缓冲中断，重新加载...';
-
-                        // 尝试重新加载
-                        setTimeout(() => {
-                            // 优先尝试恢复播放而不是直接 reload，以避免重置播放进度
-                            try {
-                                videoPlayer.play().catch(err => {
-                                    console.warn('在 stalled 后尝试恢复播放失败:', err);
-                                    try { videoPlayer.load(); } catch (e) { /* 忽略 */ }
-                                });
-                            } catch (e) {
-                                try { videoPlayer.load(); } catch (e2) { /* 忽略 */ }
-                            }
-                        }, 1000);
-                    }
-                } else {
-                    console.error('视频缓冲多次失败，停止重试');
-                    loadingBar.style.display = 'none';
-                    loadingProgress.style.width = '100%';
-                    requestAnimationFrame(() => {
-                        loadingStatus.textContent = '网络连接不稳定，请检查网络后重试';
-                    });
-                    isLoading = false;
-                }
-            });
-
-            // 监听加载数据状态
-            videoPlayer.addEventListener('loadstart', function () {
-                console.log('开始加载视频数据');
-                showLoadingStatus();
-            });
-
-            // 监听可播放数据
-            videoPlayer.addEventListener('canplaythrough', function () {
-                console.log('视频完全缓冲完成');
-                hideLoadingStatus();
-                isLoading = false;
-                stalledCount = 0; // 重置计数
-            });
-        }
-
-        // 页面加载时的初始化
-        document.addEventListener('DOMContentLoaded', function () {
-            // 确保视频元素存在
-            if (!videoPlayer || !videoTitleElement) {
-                console.error('关键元素未找到');
-                return;
-            }
-
-            // 设置视频事件监听器
-            setupVideoEventListeners();
-
-            // 初始加载状态
-            showLoadingStatus();
-
-            // 只设置playsinline，不重复设置preload
-            videoPlayer.setAttribute('playsinline', 'true');
-
-            // 同步列表中的标题为 TITLE_MAP 中的值（以映射为准）
-            try {
-                const items = document.querySelectorAll('.video-item');
-                items.forEach(item => {
-                    const onclick = item.getAttribute('onclick') || '';
-                    const m = onclick.match(/'([^']+)'/);
-                    const src = m ? m[1] : item.dataset.src;
-                    if (src && TITLE_MAP[src]) {
-                        const titleEl = item.querySelector('.video-item-title');
-                        if (titleEl) titleEl.textContent = TITLE_MAP[src];
-                    }
-                });
-
-                // 设置初始播放标题为映射值（如果存在）
-                const initialSource = (videoPlayer.querySelector('source') && videoPlayer.querySelector('source').getAttribute('src')) || null;
-                if (initialSource && TITLE_MAP[initialSource]) {
-                    videoTitleElement.textContent = TITLE_MAP[initialSource];
-                }
-            } catch (e) {
-                console.warn('同步标题时出错:', e);
-            }
-
-            console.log('视频网站初始化完成');
-        });
-
-        // 全局错误处理
-        window.addEventListener('error', function (e) {
-            console.error('全局错误:', e.error);
-        });
-
-        // 全局未处理的Promise拒绝
-        window.addEventListener('unhandledrejection', function (e) {
-            console.error('未处理的Promise拒绝:', e.reason);
-            e.preventDefault(); // 防止在控制台显示错误
-        });
-    </script>
+    <script src="scripts/main.js" defer></script>
 </body>
 
 </html>
